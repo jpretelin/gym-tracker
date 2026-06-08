@@ -236,8 +236,17 @@ export default function GymTracker() {
   const [addModal, setAddModal] = useState(null);
   const [toast, setToast] = useState(null);
 
+  const [bodyWeight, setBodyWeight] = useState(() =>
+    STORE.get("bodyWeight", [])
+  );
+  
+  const [weightInput, setWeightInput] = useState("");
+
   useEffect(() => { STORE.set("gymtrack_today", todayLog); }, [todayLog]);
   useEffect(() => { STORE.set("gymtrack_history", history); }, [history]);
+  useEffect(() => {
+    STORE.set("bodyWeight", bodyWeight);
+  }, [bodyWeight]);
 
   const showToast = msg => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
@@ -272,6 +281,21 @@ export default function GymTracker() {
     { id: "progreso", label: "PROGRESO" },
     { id: "historial", label: "HISTORIAL" },
   ];
+
+  const currentWeight =
+  bodyWeight.length > 0
+    ? bodyWeight[bodyWeight.length - 1].weight
+    : null;
+
+const lowestWeight =
+  bodyWeight.length > 0
+    ? Math.min(...bodyWeight.map(w => w.weight))
+    : null;
+
+const highestWeight =
+  bodyWeight.length > 0
+    ? Math.max(...bodyWeight.map(w => w.weight))
+    : null;
 
   return (
     <div style={{ minHeight: "100vh", background: BG, fontFamily: "'DM Mono','Courier New',monospace", color: "#ccc" }}>
@@ -486,16 +510,122 @@ export default function GymTracker() {
         )}
 
         {/* ── PROGRESO ── */}
-        {tab === "progreso" && (
+  
+        {tab === "progreso" && ( 
           <div>
+
             {history.length < 2 ? (
               <div style={{ textAlign: "center", padding: "52px 20px", border: `1px dashed ${BORDER}`, borderRadius: 14 }}>
                 <div style={{ fontSize: 42, marginBottom: 12 }}>📈</div>
                 <p style={{ color: "#2d5a35", fontSize: 13, margin: 0 }}>Guarda al menos 2 entrenamientos para ver progreso.</p>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+             
+                <div style={{ display: "flex", flexDirection: "column", gap: 18 }}> 
                 <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: 18 }}>
+
+
+                <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 14, padding: 18 }}>
+               
+  <p style={{ margin: "0 0 14px", fontSize: 10, color: "#60a5fa", letterSpacing: 2, textTransform: "uppercase" }}>
+    Peso Corporal
+  </p>
+
+  <div style={{ display: "flex", gap: 10, marginBottom: 18, flexWrap: "wrap" }}>
+    <input
+      type="number"
+      step="0.1"
+      placeholder="Peso actual (kg)"
+      value={weightInput}
+      onChange={(e) => setWeightInput(e.target.value)}
+      style={{
+        flex: 1,
+        minWidth: 140,
+        padding: 10,
+        background: BG,
+        border: `1px solid ${BORDER}`,
+        borderRadius: 8,
+        color: "#fff"
+      }}
+    />
+
+    <button
+      onClick={() => {
+        if (!weightInput) return;
+
+        setBodyWeight([
+          ...bodyWeight,
+          {
+            date: new Date().toLocaleDateString(),
+            weight: Number(weightInput),
+          },
+        ]);
+
+        setWeightInput("");
+      }}
+      style={{
+        padding: "10px 16px",
+        background: G,
+        border: "none",
+        borderRadius: 8,
+        cursor: "pointer",
+        fontWeight: 700,
+        color: BG
+      }}
+    >
+      Guardar
+    </button>
+  </div>
+
+  <div
+    style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))",
+      gap: 10,
+      marginBottom: 18
+    }}
+  >
+    <div style={{ textAlign: "center" }}>
+      <div style={{ color: G, fontSize: 20, fontWeight: 800 }}>
+        {currentWeight ?? "--"}
+      </div>
+      <div style={{ fontSize: 10, color: "#2d5a35" }}>ACTUAL</div>
+    </div>
+
+    <div style={{ textAlign: "center" }}>
+      <div style={{ color: "#60a5fa", fontSize: 20, fontWeight: 800 }}>
+        {lowestWeight ?? "--"}
+      </div>
+      <div style={{ fontSize: 10, color: "#2d5a35" }}>MÍNIMO</div>
+    </div>
+
+    <div style={{ textAlign: "center" }}>
+      <div style={{ color: "#f59e0b", fontSize: 20, fontWeight: 800 }}>
+        {highestWeight ?? "--"}
+      </div>
+      <div style={{ fontSize: 10, color: "#2d5a35" }}>MÁXIMO</div>
+    </div>
+  </div>
+
+  <ResponsiveContainer width="100%" height={220}>
+    <LineChart data={bodyWeight}>
+      <CartesianGrid stroke="#0f2d12" strokeDasharray="3 3" />
+      <XAxis
+        dataKey="date"
+        tick={{ fontSize: 9, fill: "#2d5a35", fontFamily: "monospace" }}
+      />
+      <YAxis />
+      <Tooltip />
+      <Line
+        type="monotone"
+        dataKey="weight"
+        stroke="#60a5fa"
+        strokeWidth={3}
+        dot={{ fill: "#60a5fa", r: 3 }}
+      />
+    </LineChart>
+  </ResponsiveContainer>
+</div>
                   <p style={{ margin: "0 0 14px", fontSize: 10, color: G, letterSpacing: 2, textTransform: "uppercase" }}>Series por entrenamiento</p>
                   <ResponsiveContainer width="100%" height={160}>
                     <LineChart data={chartData}>
