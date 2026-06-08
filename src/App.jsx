@@ -297,15 +297,31 @@ const highestWeight =
     ? Math.max(...bodyWeight.map(w => w.weight))
     : null;
 
+    const weightChange =
+  bodyWeight.length >= 2
+    ? (
+        bodyWeight[bodyWeight.length - 1].weight -
+        bodyWeight[0].weight
+      ).toFixed(1)
+    : 0;
+
   return (
     <div style={{ minHeight: "100vh", background: BG, fontFamily: "'DM Mono','Courier New',monospace", color: "#ccc" }}>
       <div style={{ position: "fixed", inset: 0, backgroundImage: `linear-gradient(rgba(34,197,94,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,0.025) 1px,transparent 1px)`, backgroundSize: "36px 36px", pointerEvents: "none", zIndex: 0 }} />
       <div style={{ position: "fixed", top: -250, left: "50%", transform: "translateX(-50%)", width: 600, height: 400, background: "radial-gradient(ellipse, rgba(34,197,94,0.06) 0%,transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: 920, margin: "0 auto", padding: "20px 14px 80px" }}>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1200, width: "100%", margin: "0 auto", padding: "20px 14px 80px" }}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
-          <div>
+        <div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    flexWrap: "wrap",
+    gap: 12,
+    marginBottom: 20
+  }}
+> 
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 3 }}>
               <div style={{ width: 30, height: 30, background: G, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 900, color: BG, borderRadius: 7 }}>G</div>
               <h1 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>GYM<span style={{ color: G }}>TRACK</span></h1>
@@ -318,7 +334,7 @@ const highestWeight =
                 {todayLog.length} ejercicio{todayLog.length !== 1 ? "s" : ""}
               </span>
             )}
-            <button onClick={() => setShowTimer(true)} style={{ padding: "7px 13px", background: `${G}10`, border: `1px solid ${G}30`, borderRadius: 9, color: G, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>⏱ Descanso</button>
+            <button onClick={() => setShowTimer(true)} style={{ padding: "10px 16px", background: `${G}10`, border: `1px solid ${G}30`, borderRadius: 9, color: G, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 700 }}>⏱ Descanso</button>
           </div>
         </div>
 
@@ -331,7 +347,7 @@ const highestWeight =
             style={{ width: "100%", padding: "12px 14px 12px 40px", background: CARD, border: `1px solid ${search ? G : BORDER}`, borderRadius: 12, color: "#fff", fontSize: 14, fontFamily: "inherit", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
           />
           {search && <button onClick={() => setSearch("")} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#555", cursor: "pointer", fontSize: 16 }}>✕</button>}
-        </div>
+        
 
         {/* Search results */}
         {search.trim().length > 1 && (
