@@ -1,20 +1,25 @@
-import { G, BG, CARD, BORDER } from "../utils/theme";
 import { useState, useEffect, useRef } from "react";
+import { G, BG, CARD, BORDER } from "../utils/theme";
 
 export default function RestTimer({ onClose }) {
-  const G = "#22c55e";
-  const BG = "#050d07";
-  const CARD = "#0a1a0c";
-  const BORDER = "#0f2d12";
-
     const [seconds, setSeconds] = useState(90);
     const [remaining, setRemaining] = useState(90);
     const [running, setRunning] = useState(false);
     const [done, setDone] = useState(false);
     const ref = useRef(null);
     useEffect(() => {
-      if (running && remaining > 0) ref.current = setInterval(() => setRemaining(r => r - 1), 1000);
-      else if (remaining === 0) { setRunning(false); setDone(true); }
+      if (running && remaining > 0) {
+        ref.current = setInterval(() => {
+          setRemaining(r => {
+            if (r <= 1) {
+              setRunning(false);
+              setDone(true);
+              return 0;
+            }
+            return r - 1;
+          });
+        }, 1000);
+      }
       return () => clearInterval(ref.current);
     }, [running, remaining]);
     const r = 54, circ = 2 * Math.PI * r, pct = remaining / seconds;

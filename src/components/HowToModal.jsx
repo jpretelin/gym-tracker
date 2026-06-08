@@ -1,5 +1,7 @@
 import { eqColors } from "../utils/eqColors";
 import { G, BG, CARD, BORDER } from "../utils/theme";
+import { ExerciseFigure } from "./ExerciseFigure.jsx";
+
 export function HowToModal({ exercise, onClose, onAdd }) {
    
    
@@ -13,6 +15,9 @@ export function HowToModal({ exercise, onClose, onAdd }) {
             <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: `${eqColors[exercise.equipment]}20`, color: eqColors[exercise.equipment], border: `1px solid ${eqColors[exercise.equipment]}40`, letterSpacing: 1, textTransform: "uppercase" }}>
               {exercise.equipment}
             </span>
+          </div>
+          <div style={{ marginBottom: 18 }}>
+            <ExerciseFigure exercise={exercise} size="large" />
           </div>
           <p style={{ fontSize: 11, color: G, letterSpacing: 2, textTransform: "uppercase", margin: "0 0 10px" }}>Cómo hacerlo</p>
           <ol style={{ margin: "0 0 18px", paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
