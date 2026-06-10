@@ -7,10 +7,6 @@ import { G, BG, CARD, BORDER } from "./utils/theme";
 import { AddModal } from "./components/AddModal.jsx";
 import { SubModal } from "./components/SubModal.jsx";
 import { ExerciseFigure } from "./components/ExerciseFigure.jsx";
-import { useAuth } from "./context/AuthContext";
-import Login from "./pages/Login";
-import { signOut } from "firebase/auth";
-import { auth } from "./firebase";
 
 const eqColors = {
   ninguno: "#22c55e", mancuernas: "#34d399", barra: "#86efac",
@@ -152,10 +148,7 @@ function BodyMap({ onSelect, activeGroup }) {
 // ═══════════════════════════════════════════════════════════════
 // MAIN APP
 // ═══════════════════════════════════════════════════════════════
-export default function GymTrackerContent() {
-
-  const { user } = useAuth();
-
+export default function GymTracker() {
   const [tab, setTab]                   = useState("cuerpo");
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [search, setSearch]             = useState("");
@@ -173,10 +166,6 @@ export default function GymTrackerContent() {
   useEffect(() => { STORE.set("gymtrack_history", history); },  [history]);
   useEffect(() => { STORE.set("bodyWeight", bodyWeight); },     [bodyWeight]);
 
-  if (!user) {
-    return <Login />;
-  }
-  
   const showToast = msg => { setToast(msg); setTimeout(() => setToast(null), 2500); };
 
   // Click en logo → volver al inicio
