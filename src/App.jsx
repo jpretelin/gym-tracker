@@ -282,10 +282,29 @@ export default function GymTrackerContent() {
               GYM<span style={{ color: G }}>TRACK</span>
             </span>
             </button>
+
+            <button
+  onClick={() => signOut(auth)}
+  style={{
+    padding: "6px 8px",
+    background: "transparent",
+    border: "1px solid #ef4444",
+    borderRadius: 9,
+    color: "#ef4444",
+    fontSize: 10,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    fontWeight: 700,
+    whiteSpace: "nowrap",
+    flexShrink: 0,
+  }}
+>
+  🚪 Salir
+</button>
           </div>
 
           {/* Right side */}
-          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end", }}>
             {todayLog.length > 0 && (
               <span style={{ fontSize: 11, color: G, background: `${G}15`, border: `1px solid ${G}30`, borderRadius: 20, padding: "4px 10px", whiteSpace: "nowrap" }}>
                 {todayLog.length} ejercicio{todayLog.length !== 1 ? "s" : ""}
@@ -294,6 +313,7 @@ export default function GymTrackerContent() {
             <button onClick={() => setShowTimer(true)} style={{ padding: "8px 14px", background: `${G}10`, border: `1px solid ${G}30`, borderRadius: 9, color: G, fontSize: 11, cursor: "pointer", fontFamily: "inherit", fontWeight: 700, whiteSpace: "nowrap" }}>
               ⏱ Descanso
             </button>
+
           </div>
         </div>
 
