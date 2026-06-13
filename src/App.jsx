@@ -11,6 +11,8 @@ import { useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 
 const eqColors = {
   ninguno: "#22c55e", mancuernas: "#34d399", barra: "#86efac",
@@ -538,13 +540,35 @@ export default function GymTrackerContent() {
                   value={weightInput} onChange={e => setWeightInput(e.target.value)}
                   style={{ flex: 1, minWidth: 130, padding: "10px 12px", background: BG, border: `1px solid ${BORDER}`, borderRadius: 8, color: "#fff", fontFamily: "inherit", fontSize: 14, outline: "none" }}
                 />
-                <button onClick={() => {
-                  if (!weightInput) return;
-                  setBodyWeight(p => [...p, { date: new Date().toLocaleDateString("es-MX", { day: "numeric", month: "short" }), weight: Number(weightInput) }]);
-                  setWeightInput("");
-                  showToast("⚖️ Peso guardado");
-                }} style={{ padding: "10px 18px", background: G, border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 700, color: BG, fontFamily: "inherit", fontSize: 13 }}>
-                  Guardar
+
+                <button
+                  onClick={async () => {
+                    if (!weightInput) return;
+                  
+                    const newWeight = {
+                      date: new Date().toLocaleDateString("es-MX", {
+                        day: "numeric",
+                        month: "short",
+                      }),
+                      weight: Number(weightInput),
+                    };
+                  
+                    const updatedWeights = [...bodyWeight, newWeight];
+                  
+                    setBodyWeight(updatedWeights);
+                  
+                    await setDoc(
+                      doc(db, "users", user.uid),
+                      {
+                        bodyWeight: updatedWeights,
+                      },
+                      { merge: true }
+                    );
+                  
+                    setWeightInput("");
+                    showToast("⚖️ Peso guardado");
+                  }} 
+                  >
                 </button>
               </div>
 
