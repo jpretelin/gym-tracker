@@ -169,6 +169,7 @@ export default function GymTrackerContent() {
   const [addModal, setAddModal]         = useState(null);
   const [toast, setToast]               = useState(null);
   const [bodyWeight, setBodyWeight]     = useState(() => STORE.get("bodyWeight", []));
+  const [records, setRecords] = useState(() => STORE.get("records", {}));
   const [weightInput, setWeightInput]   = useState("");
 
   useEffect(() => {
@@ -192,9 +193,10 @@ export default function GymTrackerContent() {
   
     saveTodayLog();
   }, [todayLog, user]);
-  
+
   useEffect(() => { STORE.set("gymtrack_history", history); },  [history]);
   useEffect(() => { STORE.set("bodyWeight", bodyWeight); },     [bodyWeight]);
+  useEffect(() => { STORE.set("records", records); }, [records]);
 
   useEffect(() => {
     const loadWeight = async () => {
@@ -280,6 +282,27 @@ export default function GymTrackerContent() {
     );
   
     console.log("Historial guardado:", updatedHistory);
+
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        history: updatedHistory,
+      },
+      { merge: true }
+    );
+    
+
+    const newRecords = { ...records };
+
+todayLog.forEach(exercise => {
+  const currentRecord = newRecords[exercise.name] || 0;
+
+  if (exercise.weight > currentRecord) {
+    newRecords[exercise.name] = exercise.weight;
+  }
+});
+
+setRecords(newRecords);
 
     setTodayLog([]);
     showToast("💪 ¡Entrenamiento guardado!");
@@ -644,6 +667,49 @@ export default function GymTrackerContent() {
                   >
                 </button>
               </div>
+
+              <div
+  style={{
+    background: CARD,
+    border: `1px solid ${BORDER}`,
+    borderRadius: 14,
+    padding: 18,
+    marginTop: 16,
+  }}
+>
+  <p
+    style={{
+      margin: "0 0 14px",
+      fontSize: 10,
+      color: "#f59e0b",
+      letterSpacing: 2,
+      textTransform: "uppercase",
+    }}
+  >
+    🏆 Récords Personales
+  </p>
+
+  {Object.keys(records).length === 0 ? (
+    <p style={{ color: "#9ca3af" }}>
+      Aún no hay récords registrados.
+    </p>
+  ) : (
+    Object.entries(records).map(([exercise, weight]) => (
+      <div
+        key={exercise}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "8px 0",
+          borderBottom: `1px solid ${BORDER}`,
+        }}
+      >
+        <span>{exercise}</span>
+        <strong>{weight} kg</strong>
+      </div>
+    ))
+  )}
+</div>
 
               {bodyWeight.length > 0 && (
                 <>
