@@ -11,7 +11,7 @@ import { useAuth } from "./context/AuthContext";
 import Login from "./pages/Login";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 const eqColors = {
@@ -174,6 +174,28 @@ export default function GymTrackerContent() {
   useEffect(() => { STORE.set("gymtrack_today", todayLog); },   [todayLog]);
   useEffect(() => { STORE.set("gymtrack_history", history); },  [history]);
   useEffect(() => { STORE.set("bodyWeight", bodyWeight); },     [bodyWeight]);
+
+  useEffect(() => {
+    const loadWeight = async () => {
+      if (!user) return;
+  
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+  
+        if (snap.exists()) {
+          const data = snap.data();
+  
+          if (data.bodyWeight) {
+            setBodyWeight(data.bodyWeight);
+          }
+        }
+      } catch (error) {
+        console.error("Error cargando peso:", error);
+      }
+    };
+  
+    loadWeight();
+  }, [user]);
 
   if (!user) {
     return <Login />;
