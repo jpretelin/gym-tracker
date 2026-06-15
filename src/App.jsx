@@ -326,6 +326,26 @@ setRecords(newRecords);
       new Date(workout.dateRaw).toDateString()
     )
   );
+  const sortedDays = [...trainedDays]
+  .map(day => new Date(day))
+  .sort((a, b) => b - a);
+
+let currentStreak = 0;
+
+if (sortedDays.length > 0) {
+  currentStreak = 1;
+
+  for (let i = 0; i < sortedDays.length - 1; i++) {
+    const diff =
+      (sortedDays[i] - sortedDays[i + 1]) / (1000 * 60 * 60 * 24);
+
+    if (Math.round(diff) === 1) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+}
 
   const last30Days = [];
 
@@ -756,7 +776,27 @@ for (let i = 29; i >= 0; i--) {
         >
           {last30Days.map((day, index) => {
             const trained = trainedDays.has(day.toDateString());
+            const sortedDays = [...trainedDays]
+  .map(day => new Date(day))
+  .sort((a, b) => b - a);
 
+let currentStreak = 0;
+
+if (sortedDays.length > 0) {
+  currentStreak = 1;
+
+  for (let i = 0; i < sortedDays.length - 1; i++) {
+    const diff =
+      (sortedDays[i] - sortedDays[i + 1]) /
+      (1000 * 60 * 60 * 24);
+
+    if (Math.round(diff) === 1) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+}
             return (
               <div
                 key={index}
@@ -772,6 +812,43 @@ for (let i = 29; i >= 0; i--) {
           })}
         </div>
       </div>
+
+      <div
+  style={{
+    background: CARD,
+    border: `1px solid ${BORDER}`,
+    borderRadius: 14,
+    padding: 18,
+    marginTop: 16,
+  }}
+>
+  <p
+    style={{
+      margin: "0 0 14px",
+      fontSize: 10,
+      color: "#f97316",
+      letterSpacing: 2,
+      textTransform: "uppercase",
+    }}
+  >
+    🔥 Racha
+  </p>
+
+  <div
+    style={{
+      fontSize: 28,
+      fontWeight: 800,
+      color: "#f97316",
+    }}
+  >
+    {currentStreak}
+  </div>
+
+  <p style={{ marginTop: 8, color: "#9ca3af" }}>
+    día{currentStreak !== 1 ? "s" : ""} consecutivo{currentStreak !== 1 ? "s" : ""}
+  </p>
+</div>
+
 
               {bodyWeight.length > 0 && (
                 <>
