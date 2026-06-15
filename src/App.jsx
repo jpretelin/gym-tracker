@@ -318,7 +318,22 @@ setRecords(newRecords);
   const panelExercises = selectedGroup ? EXERCISES[selectedGroup] || [] : [];
   const chartData      = [...history].reverse().slice(-10).map(w => ({
     name: w.date.split(" ")[0], series: w.totalSets, reps: w.totalReps,
+
   }));
+
+  const trainedDays = new Set(
+    history.map(workout =>
+      new Date(workout.dateRaw).toDateString()
+    )
+  );
+
+  const last30Days = [];
+
+for (let i = 29; i >= 0; i--) {
+  const day = new Date();
+  day.setDate(day.getDate() - i);
+  last30Days.push(day);
+}
 
   const today          = new Date().toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
   const currentWeight  = bodyWeight.length > 0 ? bodyWeight[bodyWeight.length - 1].weight : null;
@@ -668,48 +683,95 @@ setRecords(newRecords);
                 </button>
               </div>
 
-              <div
-  style={{
-    background: CARD,
-    border: `1px solid ${BORDER}`,
-    borderRadius: 14,
-    padding: 18,
-    marginTop: 16,
-  }}
->
-  <p
-    style={{
-      margin: "0 0 14px",
-      fontSize: 10,
-      color: "#f59e0b",
-      letterSpacing: 2,
-      textTransform: "uppercase",
-    }}
-  >
-    🏆 Récords Personales
-  </p>
-
-  {Object.keys(records).length === 0 ? (
-    <p style={{ color: "#9ca3af" }}>
-      Aún no hay récords registrados.
-    </p>
-  ) : (
-    Object.entries(records).map(([exercise, weight]) => (
-      <div
-        key={exercise}
+                    <div
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "8px 0",
-          borderBottom: `1px solid ${BORDER}`,
+          background: CARD,
+          border: `1px solid ${BORDER}`,
+          borderRadius: 14,
+          padding: 18,
+          marginTop: 16,
         }}
       >
-        <span>{exercise}</span>
-        <strong>{weight} kg</strong>
+        <p
+          style={{
+            margin: "0 0 14px",
+            fontSize: 10,
+            color: "#f59e0b",
+            letterSpacing: 2,
+            textTransform: "uppercase",
+          }}
+        >
+          🏆 Récords Personales
+        </p>
+
+        {Object.keys(records).length === 0 ? (
+          <p style={{ color: "#9ca3af" }}>
+            Aún no hay récords registrados.
+          </p>
+        ) : (
+          Object.entries(records).map(([exercise, weight]) => (
+            <div
+              key={exercise}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                padding: "8px 0",
+                borderBottom: `1px solid ${BORDER}`,
+              }}
+            >
+              <span>{exercise}</span>
+              <strong>{weight} kg</strong>
+            </div>
+          ))
+        )}
       </div>
-    ))
-  )}
-</div>
+
+      <div
+        style={{
+          background: CARD,
+          border: `1px solid ${BORDER}`,
+          borderRadius: 14,
+          padding: 18,
+          marginTop: 16,
+        }}
+      >
+        <p
+          style={{
+            margin: "0 0 14px",
+            fontSize: 10,
+            color: "#22c55e",
+            letterSpacing: 2,
+            textTransform: "uppercase",
+          }}
+        >
+          📅 Actividad (30 días)
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(6, 1fr)",
+            gap: 6,
+          }}
+        >
+          {last30Days.map((day, index) => {
+            const trained = trainedDays.has(day.toDateString());
+
+            return (
+              <div
+                key={index}
+                title={day.toLocaleDateString()}
+                style={{
+                  aspectRatio: "1",
+                  borderRadius: 6,
+                  background: trained ? "#22c55e" : "#1f2937",
+                  border: `1px solid ${BORDER}`,
+                }}
+              />
+            );
+          })}
+        </div>
+      </div>
 
               {bodyWeight.length > 0 && (
                 <>
