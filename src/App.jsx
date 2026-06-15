@@ -171,7 +171,28 @@ export default function GymTrackerContent() {
   const [bodyWeight, setBodyWeight]     = useState(() => STORE.get("bodyWeight", []));
   const [weightInput, setWeightInput]   = useState("");
 
-  useEffect(() => { STORE.set("gymtrack_today", todayLog); },   [todayLog]);
+  useEffect(() => {
+    STORE.set("gymtrack_today", todayLog);
+  
+    const saveTodayLog = async () => {
+      if (!user) return;
+  
+      try {
+        await setDoc(
+          doc(db, "users", user.uid),
+          {
+            todayLog,
+          },
+          { merge: true }
+        );
+      } catch (error) {
+        console.error("Error guardando todayLog:", error);
+      }
+    };
+  
+    saveTodayLog();
+  }, [todayLog, user]);
+  
   useEffect(() => { STORE.set("gymtrack_history", history); },  [history]);
   useEffect(() => { STORE.set("bodyWeight", bodyWeight); },     [bodyWeight]);
 
@@ -188,7 +209,16 @@ export default function GymTrackerContent() {
           if (data.bodyWeight) {
             setBodyWeight(data.bodyWeight);
           }
+  
+          if (data.history) {
+            setHistory(data.history);
+          }
+          
+          if (data.todayLog) {
+            setTodayLog(data.todayLog);
+          }
         }
+
       } catch (error) {
         console.error("Error cargando peso:", error);
       }
@@ -221,18 +251,39 @@ export default function GymTrackerContent() {
     showToast(`✓ ${name} añadido`);
   };
 
-  const saveWorkout = () => {
+  const saveWorkout = async () => {
+    console.log("SAVE WORKOUT EJECUTADO");
     if (!todayLog.length) return;
-    setHistory(p => [{
-      date: new Date().toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" }),
+  
+    const newWorkout = {
+      date: new Date().toLocaleDateString("es-MX", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
       dateRaw: Date.now(),
       exercises: todayLog,
       totalSets: todayLog.reduce((s, e) => s + e.sets, 0),
       totalReps: todayLog.reduce((s, e) => s + e.sets * e.reps, 0),
-    }, ...p]);
+    };
+  
+    const updatedHistory = [newWorkout, ...history];
+  
+    setHistory(updatedHistory);
+  
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        history: updatedHistory,
+      },
+      { merge: true }
+    );
+  
+    console.log("Historial guardado:", updatedHistory);
+
     setTodayLog([]);
     showToast("💪 ¡Entrenamiento guardado!");
-  };
+  }; 
 
   const allExercises   = Object.entries(EXERCISES).flatMap(([grp, exs]) => exs.map(e => ({ ...e, group: grp })));
   const searchResults  = search.trim().length > 1
