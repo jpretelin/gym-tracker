@@ -170,6 +170,7 @@ export default function GymTrackerContent() {
   const [toast, setToast]               = useState(null);
   const [bodyWeight, setBodyWeight]     = useState(() => STORE.get("bodyWeight", []));
   const [records, setRecords] = useState(() => STORE.get("records", {}));
+  const [routines, setRoutines] = useState(() => STORE.get("routines", []));
   const [weightInput, setWeightInput]   = useState("");
 
   useEffect(() => {
@@ -197,6 +198,29 @@ export default function GymTrackerContent() {
   useEffect(() => { STORE.set("gymtrack_history", history); },  [history]);
   useEffect(() => { STORE.set("bodyWeight", bodyWeight); },     [bodyWeight]);
   useEffect(() => { STORE.set("records", records); }, [records]);
+  useEffect(() => {
+    STORE.set("routines", routines);
+  }, [routines]);
+
+  useEffect(() => {
+    const saveRoutines = async () => {
+      if (!user) return;
+  
+      try {
+        await setDoc(
+          doc(db, "users", user.uid),
+          {
+            routines,
+          },
+          { merge: true }
+        );
+      } catch (error) {
+        console.error("Error guardando rutinas:", error);
+      }
+    };
+  
+    saveRoutines();
+  }, [routines, user]);
 
   useEffect(() => {
     const loadWeight = async () => {
@@ -219,6 +243,11 @@ export default function GymTrackerContent() {
           if (data.todayLog) {
             setTodayLog(data.todayLog);
           }
+
+          if (data.routines) {
+            setRoutines(data.routines);
+          }
+
         }
 
       } catch (error) {
@@ -252,6 +281,25 @@ export default function GymTrackerContent() {
     setHowtoModal(null);
     showToast(`✓ ${name} añadido`);
   };
+
+  const saveRoutine = () => {
+    if (!todayLog.length) return;
+  
+    const routineName = prompt("Nombre de la rutina");
+  
+    if (!routineName) return;
+  
+    const newRoutine = {
+      id: Date.now(),
+      name: routineName,
+      exercises: todayLog,
+    };
+  
+    setRoutines(prev => [...prev, newRoutine]);
+  
+    showToast("💾 Rutina guardada");
+  };
+
 
   const saveWorkout = async () => {
     console.log("SAVE WORKOUT EJECUTADO");
@@ -383,6 +431,10 @@ for (let i = 29; i >= 0; i--) {
     { id: "hoy",      label: "HOY"      },
     { id: "progreso", label: "PROGRESO" },
     { id: "historial",label: "HISTORIAL"},
+    {
+      id: "rutinas",
+      label: "RUTINAS"
+    },
   ];
 
   /* ─── shared button style helpers ─── */
@@ -647,13 +699,52 @@ for (let i = 29; i >= 0; i--) {
               </div>
             )}
 
-            {todayLog.length > 0 && (
-              <button onClick={saveWorkout} style={{ width: "100%", padding: 15, background: G, border: "none", borderRadius: 12, color: BG, fontWeight: 900, fontSize: 13, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit" }}>
-                GUARDAR ENTRENAMIENTO
-              </button>
+    {todayLog.length > 0 && (
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+
+        <button
+          onClick={saveWorkout}
+          style={{
+            flex: 1,
+            padding: 15,
+            background: G,
+            border: "none",
+            borderRadius: 12,
+            color: BG,
+            fontWeight: 900,
+            fontSize: 13,
+            letterSpacing: 2,
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          GUARDAR ENTRENAMIENTO
+        </button>
+
+        <button
+          onClick={saveRoutine}
+          style={{
+            flex: 1,
+            padding: 15,
+            background: CARD,
+            border: `1px solid ${BORDER}`,
+            borderRadius: 12,
+            color: "#fff",
+            fontWeight: 900,
+            fontSize: 13,
+            letterSpacing: 2,
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          💾 GUARDAR RUTINA
+        </button>
+
+      </div>
+    )}
+              </div>
+
             )}
-          </div>
-        )}
 
         {/* ════════════════════════════════
             TAB: PROGRESO
@@ -954,6 +1045,102 @@ if (sortedDays.length > 0) {
             )}
           </div>
         )}
+
+         {/* ════════════════════════════════
+            TAB: RUTINAS
+        ════════════════════════════════ */}
+
+{tab === "rutinas" && (
+  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+
+    {routines.length === 0 ? (
+      <div
+        style={{
+          background: CARD,
+          border: `1px solid ${BORDER}`,
+          borderRadius: 12,
+          padding: 20,
+          textAlign: "center",
+        }}
+      >
+        No hay rutinas guardadas.
+      </div>
+    ) : (
+      routines.map(routine => (
+        <div
+          key={routine.id}
+          style={{
+            background: CARD,
+            border: `1px solid ${BORDER}`,
+            borderRadius: 12,
+            padding: 16,
+          }}
+        >
+          <h3 style={{ margin: 0 }}>
+            {routine.name}
+          </h3>
+
+          <p style={{ color: "#888" }}>
+            {routine.exercises.length} ejercicios
+          </p>
+
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+
+<button
+  onClick={() => {
+    setTodayLog(routine.exercises);
+    setTab("hoy");
+    showToast("📁 Rutina cargada");
+  }}
+>
+  ▶ Cargar
+</button>
+
+<button
+  onClick={() => {
+    const newName = prompt(
+      "Nuevo nombre de la rutina",
+      routine.name
+    );
+
+    if (!newName) return;
+
+    setRoutines(prev =>
+      prev.map(r =>
+        r.id === routine.id
+          ? { ...r, name: newName }
+          : r
+      )
+    );
+
+    showToast("✏️ Rutina actualizada");
+  }}
+>
+  ✏ Editar
+</button>
+
+<button
+  onClick={() => {
+    if (!confirm("¿Eliminar rutina?")) return;
+
+    setRoutines(prev =>
+      prev.filter(r => r.id !== routine.id)
+    );
+
+    showToast("🗑 Rutina eliminada");
+  }}
+>
+  🗑 Eliminar
+</button>
+
+  </div>
+  </div>
+      ))
+)}
+
+</div>
+)}
+
 
       </div>{/* end main container */}
 
